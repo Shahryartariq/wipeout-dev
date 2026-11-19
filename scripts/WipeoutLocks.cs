@@ -420,7 +420,9 @@ public static class WipeoutLocks
         return result;
     }
 
-    private static string Canonical(string path)
+    // The real, long form of a path: expands 8.3 short names (RUNNER~1) and
+    // follows links, so the same folder always compares equal.
+    public static string Canonical(string path)
     {
         string full = Path.GetFullPath(path).TrimEnd('\\');
         IntPtr h = CreateFileW(full, 0, FILE_SHARE_ALL, IntPtr.Zero, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, IntPtr.Zero);

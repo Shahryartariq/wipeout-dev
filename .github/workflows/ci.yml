@@ -57,5 +57,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      # Ubuntu runners ship Electron's chrome-sandbox without the setuid bit,
+      # so Chromium refuses to start. Give it the permissions it expects.
+      - name: Set up Electron's sandbox helper
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
       - name: End-to-end flows in Electron
         run: xvfb-run -a npm run e2e
