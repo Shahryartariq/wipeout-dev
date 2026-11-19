@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wipeout: delete locked folders on Windows (free)</title>
+  <meta name="description" content="Delete folders Windows won't let you delete. Wipeout shows which program is holding a folder, stops it, and wipes node_modules fast. Free for Windows 10 and 11.">
+  <link rel="canonical" href="https://getwipeout.vercel.app/">
+  <meta name="theme-color" content="#1d2024">
+  <meta name="color-scheme" content="dark">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Wipeout">
+  <meta property="og:url" content="https://getwipeout.vercel.app/">
+  <meta property="og:title" content="Wipeout: delete folders Windows won't let you delete">
+  <meta property="og:description" content="See what's holding a locked folder, stop it, and wipe it fast. Free for Windows 10 and 11.">
+  <meta property="og:image" content="https://getwipeout.vercel.app/assets/og.png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="Wipeout logo: an unlocked padlock with a hazard-striped body">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/assets/favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="preload" href="/assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Wipeout",
+    "operatingSystem": "Windows 10, Windows 11",
+    "applicationCategory": "UtilitiesApplication",
+    "description": "Shows which program is holding a locked folder, stops it, and deletes the folder fast, including node_modules and paths over 260 characters.",
+    "url": "https://getwipeout.vercel.app/",
+    "downloadUrl": "https://github.com/Shahryartariq/wipeout-dev/releases/latest",
+    "softwareVersion": "1.0.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Shehryar Tariq", "url": "https://github.com/Shahryartariq" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "How do I delete a folder that is open in another program?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Drop the folder into Wipeout. It lists every program holding the folder, in plain words, such as \"React dev server on localhost:3000, started from a PowerShell window\". Click Stop, then hold the wipe button. Wipeout stops the program and the processes it started, and deletes the folder." } },
+      { "@type": "Question", "name": "How do I fix EBUSY: resource busy or locked when deleting node_modules?",
+        "acceptedAnswer": { "@type": "Answer", "text": "EBUSY means a running process still has a file inside node_modules open, usually a dev server, a file watcher, VS Code or a terminal sitting in the folder. Wipeout finds that process, including native add-ons (.node files) loaded as libraries, which other tools miss, and stops it before deleting." } },
+      { "@type": "Question", "name": "How do I delete a folder with a path that is too long?",
+        "acceptedAnswer": { "@type": "Answer", "text": "File Explorer fails on paths over 260 characters, which deep node_modules folders often have. Wipeout deletes them without needing the LongPathsEnabled setting." } },
+      { "@type": "Question", "name": "Is Wipeout safe?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Wipeout refuses to delete whole drives, Windows, Program Files and your user folder. It never follows a junction or symlink out of a folder, never stops Explorer or Windows Security, and checks that a process is still the same program before stopping it. Deletion needs a press-and-hold, not a click." } },
+      { "@type": "Question", "name": "How is Wipeout different from PowerToys File Locksmith or IObit Unlocker?",
+        "acceptedAnswer": { "@type": "Answer", "text": "File Locksmith and IObit Unlocker show process names such as node.exe. Wipeout names what that process is (a Vite dev server, an npm script, a Git Bash terminal), stops the whole chain without closing VS Code, catches libraries loaded from the folder, deletes node_modules in parallel past the 260-character limit, and can clean every old node_modules under a projects folder at once." } }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Wipeout home">
+      <img src="/assets/icon-192.png" width="28" height="28" alt="">
+      <span>wipeout</span>
+    </a>
+    <nav aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#safety">Safety</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/Shahryartariq/wipeout-dev">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- Hero: what Windows tells you, and what Wipeout tells you -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">Delete the folder Windows won't let you delete.</h1>
+        <p class="lead">Windows only says the folder is open in another program. Wipeout tells you which one, stops it, and wipes the folder, even a <code>node_modules</code> with 100,000 files.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/Shahryartariq/wipeout-dev/releases/latest" data-download>Download for Windows</a>
+          <a class="btn quiet" href="https://github.com/Shahryartariq/wipeout-dev">Source on GitHub</a>
+        </div>
+        <p class="meta">Free and open source (MIT). Windows 10 and 11. No account, no tracking.</p>
+      </div>
+
+      <div class="versus" aria-label="What Windows says compared with what Wipeout says">
+        <figure class="win-dialog" aria-label="The Windows Folder In Use dialog">
+          <div class="win-title"><span>Folder In Use</span><span class="win-x" aria-hidden="true">✕</span></div>
+          <div class="win-body">
+            <p class="win-main">The action can't be completed because the folder or a file in it is open in another program.</p>
+            <p class="win-sub">Close the folder or file and try again.</p>
+            <div class="win-file">
+              <span class="win-folder" aria-hidden="true"></span>
+              <span>days_counter</span>
+            </div>
+          </div>
+          <div class="win-buttons"><span>Try Again</span><span>Cancel</span></div>
+          <figcaption>Windows</figcaption>
+        </figure>
+
+        <figure class="answer" aria-label="Wipeout's answer">
+          <div class="answer-head">1 program is holding this folder</div>
+          <div class="tag">
+            <div>
+              <div class="tag-title">React dev server on localhost:3000</div>
+              <div class="tag-detail">Started from a PowerShell window. PID 24904 plus 3 more</div>
+              <div class="tag-cmd">node node_modules\react-scripts\scripts\start.js</div>
+            </div>
+            <span class="tag-stop">Stop</span>
+          </div>
+          <figcaption>Wipeout</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- What it finds -->
+    <section class="finds" id="how" aria-labelledby="finds-title">
+      <h2 id="finds-title">It finds what other tools miss</h2>
+      <p class="section-lead">A folder can be held in four ways. Explorer can't tell you about any of them. Most unlocker tools catch the first.</p>
+      <ul class="find-list">
+        <li>
+          <h3>A program has a file open</h3>
+          <p>A dev server, a file watcher, your editor. Wipeout reads every open handle on the system and names the program the way you'd describe it: "Vite dev server on localhost:5173", "npm start".</p>
+        </li>
+        <li>
+          <h3>A terminal is sitting in it</h3>
+          <p>You <code>cd</code>'d into the folder in Git Bash last week and never closed the window. That's enough to block the delete.</p>
+        </li>
+        <li>
+          <h3>A library is loaded from it</h3>
+          <p>Native add-ons (<code>.node</code> files) and DLLs inside node_modules are loaded into memory and never show up as open files. Wipeout checks every process's loaded libraries too.</p>
+        </li>
+        <li>
+          <h3>A program runs from inside it</h3>
+          <p>An <code>electron.exe</code> or <code>esbuild.exe</code> started from node_modules locks the folder it lives in.</p>
+        </li>
+      </ul>
+      <p class="after-list">One click on <strong>Stop</strong> ends the whole chain (terminal, npm, node) but never closes VS Code, Explorer or your browser.</p>
+    </section>
+
+    <!-- The memorable moment: hold to wipe -->
+    <section class="demo" aria-labelledby="demo-title">
+      <div class="demo-copy">
+        <h2 id="demo-title">No "Are you sure?" to click through on autopilot</h2>
+        <p>Deleting takes a press and hold, so it's always on purpose. Then it's fast: Wipeout deletes in parallel with a live count, clears read-only files as it goes, and handles paths over Windows' 260-character limit.</p>
+        <p class="hint">Try it: press and hold the bar (or focus it and hold Space).</p>
+      </div>
+      <div class="demo-box">
+        <div class="demo-folder">
+          <div>
+            <div class="demo-name" id="demo-name">node_modules</div>
+            <div class="demo-path">D:\Projects\days_counter</div>
+          </div>
+          <div class="demo-count"><span id="demo-files">38,210</span><span class="demo-unit">files</span></div>
+        </div>
+        <button class="hold" id="demo-hold" type="button" aria-describedby="demo-status">
+          <span class="hold-face" aria-hidden="true"><span class="hold-label">Hold to wipe out</span><span class="hold-sub">412 MB, permanently</span></span>
+          <span class="hold-face fill" aria-hidden="true"><span class="hold-label">Hold to wipe out</span><span class="hold-sub">412 MB, permanently</span></span>
+          <span class="visually-hidden">Press and hold to run the demo wipe</span>
+        </button>
+        <p class="demo-status" id="demo-status" role="status" aria-live="polite">This is a demo. Nothing on your computer is touched.</p>
+      </div>
+    </section>
+
+    <!-- Batch -->
+    <section class="batch" aria-labelledby="batch-title">
+      <div class="batch-copy">
+        <h2 id="batch-title">Clean every old node_modules at once</h2>
+        <p>Point Wipeout at your projects folder. It lists every <code>node_modules</code> (and Rust <code>target</code>) with its size and when you last touched the project, and ticks the ones idle for 30 days or more. If something is holding one, it says what, and stops it before wiping.</p>
+        <p>Your code stays. Run <code>npm install</code> in a project to get its dependencies back.</p>
+      </div>
+      <img class="shot" src="/assets/app-batch.webp" width="560" height="760" loading="lazy" decoding="async"
+        alt="Wipeout listing node_modules folders in a Projects folder with their sizes and ages, old ones ticked">
+    </section>
+
+    <!-- Safety -->
+    <section class="safety" id="safety" aria-labelledby="safety-title">
+      <h2 id="safety-title">Built so it can't wipe the wrong thing</h2>
+      <ul class="safety-list">
+        <li><strong>Refuses dangerous folders.</strong> Whole drives, Windows, Program Files, your user folder and anything that contains them.</li>
+        <li><strong>Never follows links.</strong> Drop a junction or symlink and only the link is removed. The folder it points to is untouched.</li>
+        <li><strong>Never stops Windows.</strong> Explorer, Windows Security and system processes get advice instead of a Stop button.</li>
+        <li><strong>Checks before it stops.</strong> If a process ID now belongs to a different program, Wipeout leaves it alone.</li>
+        <li><strong>Warns about unsaved work.</strong> Git repos show uncommitted changes, unpushed commits, or "this repo exists only here".</li>
+        <li><strong>Works offline.</strong> No account and no telemetry. The only network call is the update check against GitHub.</li>
+      </ul>
+    </section>
+
+    <!-- App screenshot + second CTA -->
+    <section class="get" aria-labelledby="get-title">
+      <img class="shot" src="/assets/app-locked.webp" width="560" height="760" loading="lazy" decoding="async"
+        alt="Wipeout showing a React dev server holding the days_counter folder, with a Stop button and a hold-to-wipe bar">
+      <div class="get-copy">
+        <h2 id="get-title">Get Wipeout</h2>
+        <p>Choose the installer, which updates itself, or the portable .exe, which needs no install. Both are on the releases page.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/Shahryartariq/wipeout-dev/releases/latest" data-download>Download for Windows</a>
+        </div>
+        <p class="meta">Windows may show "Windows protected your PC" because Wipeout isn't code-signed yet. Choose <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
+        <p class="meta">After installing, right-click any folder in File Explorer and choose <strong>Wipe out</strong>. On Windows 11 it's under <em>Show more options</em>.</p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <details>
+        <summary>How do I delete a folder that's open in another program?</summary>
+        <p>Drop the folder into Wipeout. It lists every program holding the folder, in plain words, such as "React dev server on localhost:3000, started from a PowerShell window". Click <strong>Stop</strong>, then hold the wipe button. Wipeout stops that program and the processes it started, and deletes the folder.</p>
+      </details>
+      <details>
+        <summary>How do I fix <code>EBUSY: resource busy or locked</code> when deleting node_modules?</summary>
+        <p>EBUSY means a running process still has a file inside node_modules open. It's usually a dev server, a file watcher, VS Code, or a terminal sitting in the folder. Wipeout finds it, including native add-ons loaded as libraries, which other tools miss, and stops it before deleting. The same goes for <code>EPERM: operation not permitted, unlink</code>.</p>
+      </details>
+      <details>
+        <summary>"Source Path Too Long": how do I delete a folder with a path that's too long?</summary>
+        <p>File Explorer can't delete paths over 260 characters, and deep node_modules folders often have them. Wipeout deletes them without you turning on the LongPathsEnabled setting or renaming anything.</p>
+      </details>
+      <details>
+        <summary>How is it different from PowerToys File Locksmith or IObit Unlocker?</summary>
+        <p>Those show you <code>node.exe</code>. Wipeout tells you it's a Vite dev server on port 5173 started from Git Bash. It stops that whole chain without closing your editor, catches libraries loaded from the folder, deletes node_modules in parallel past the 260-character limit, and can clean every old node_modules under a folder at once. It's free, open source, and has no bundled offers.</p>
+      </details>
+      <details>
+        <summary>Is it safe?</summary>
+        <p>It refuses drives, Windows, Program Files and your user folder, never follows links, never stops parts of Windows, and checks that a process is still the same program before stopping it. Deleting is permanent (it skips the Recycle Bin), so it asks you to press and hold. The code is <a href="https://github.com/Shahryartariq/wipeout-dev">on GitHub</a> with tests for each of these rules.</p>
+      </details>
+      <details>
+        <summary>Why doesn't the folder show what's holding it?</summary>
+        <p>Programs running as administrator can hold files without being visible to a normal app. Use <strong>Restart as administrator</strong> in Wipeout. Locks inside some antivirus or backup drivers can't be traced to a program at all. Wait a few seconds and rescan.</p>
+      </details>
+      <details>
+        <summary>Does it collect data?</summary>
+        <p>No. Wipeout has no account, no analytics and no telemetry. It checks GitHub for updates and keeps a local log in <code>%APPDATA%\Wipeout\logs</code> that never leaves your PC.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Wipeout is free software under the <a href="https://github.com/Shahryartariq/wipeout-dev/blob/main/LICENSE">MIT license</a>, made by <a href="https://github.com/Shahryartariq">Shehryar Tariq</a>.</p>
+    <p><a href="https://github.com/Shahryartariq/wipeout-dev/issues">Report a problem</a> <a href="https://github.com/Shahryartariq/wipeout-dev/blob/main/SECURITY.md">Security</a> <a href="https://github.com/Shahryartariq/wipeout-dev/blob/main/CHANGELOG.md">What's new</a></p>
+  </footer>
+
+  <script src="/main.js" defer></script>
+</body>
+</html>

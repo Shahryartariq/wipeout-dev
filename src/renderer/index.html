@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Wipeout</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="titlebar">
+    <span class="wordmark">wipeout</span>
+    <button class="icon-btn" id="settings-btn" aria-label="Settings" aria-expanded="false" aria-controls="settings">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1c.5.4 1.1.8 1.7 1l.4 2.5h4l.4-2.5c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.4-2-1.6ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" transform="translate(-1 0)"/></svg>
+    </button>
+  </header>
+
+  <div class="settings" id="settings" hidden>
+    <label class="switch-row">
+      <input type="checkbox" id="ctx-toggle">
+      <span class="switch" aria-hidden="true"></span>
+      <span>
+        <span class="switch-title">Wipe out from the right-click menu</span>
+        <span class="switch-note" id="ctx-note">Right-click any folder in File Explorer. On Windows 11 it's under Show more options.</span>
+      </span>
+    </label>
+    <div class="settings-foot">
+      <span id="app-version">Wipeout</span>
+      <button class="text-btn" id="open-logs">Open log folder</button>
+    </div>
+  </div>
+
+  <main id="app" tabindex="-1"></main>
+
+  <div class="drop-veil" id="drop-veil" hidden><span>Let go to inspect this folder</span></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="locks-logic.js"></script>
+  <script src="app.js"></script>
+  <script src="batch.js"></script>
+</body>
+</html>

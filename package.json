@@ -1,0 +1,124 @@
+{
+  "name": "wipeout",
+  "productName": "Wipeout",
+  "version": "1.0.0",
+  "description": "Delete folders Windows won't let you delete. Wipeout shows the dev server, terminal or app holding a locked folder, stops it, and wipes node_modules fast, even past the 260-character path limit.",
+  "keywords": [
+    "windows",
+    "delete locked folder",
+    "file in use",
+    "folder in use",
+    "unlocker",
+    "node_modules",
+    "npkill",
+    "EBUSY",
+    "EPERM",
+    "long path",
+    "electron",
+    "developer tools"
+  ],
+  "homepage": "https://github.com/Shahryartariq/wipeout-dev#readme",
+  "bugs": "https://github.com/Shahryartariq/wipeout-dev/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shahryartariq/wipeout-dev.git"
+  },
+  "main": "src/main.js",
+  "author": "Shehryar Tariq",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/wipe-core.test.js && node test/locks-logic.test.js && node test/helper.test.js",
+    "test:windows": "node test/windows-locks.test.js",
+    "e2e": "electron test/e2e.js",
+    "lint": "eslint .",
+    "bench": "node test/bench.js",
+    "build:helper": "node scripts/build-helper.js",
+    "dist": "npm run build:helper && electron-builder --win --publish never",
+    "release": "npm run build:helper && electron-builder --win --publish always",
+    "shots": "electron test/screenshot-main.js"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0"
+  },
+  "build": {
+    "appId": "dev.sherry.wipeout",
+    "productName": "Wipeout",
+    "copyright": "Copyright © 2026 Shehryar Tariq",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/wipeout-locks.exe",
+        "to": "wipeout-locks.exe"
+      },
+      {
+        "from": "scripts",
+        "to": "scripts",
+        "filter": [
+          "*.ps1",
+          "*.cs"
+        ]
+      }
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "electronFuses": {
+      "runAsNode": false,
+      "enableCookieEncryption": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-${version}-${arch}-${target}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "draft"
+      }
+    ]
+  }
+}

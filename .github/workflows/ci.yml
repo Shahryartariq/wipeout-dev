@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows (real lock scanning)
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build the lock scanner from source
+        run: npm run build:helper
+      - run: npm run lint
+      - name: Unit tests
+        run: npm test
+      - name: Lock scanner against real processes
+        run: npm run test:windows
+      - name: End-to-end flows in Electron
+        run: npm run e2e
+      - name: Delete speed vs rmdir /s /q
+        run: npm run bench
+      - name: Package (no publish)
+        run: npx electron-builder --win --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wipeout-windows
+          path: |
+            dist/*.exe
+          retention-days: 7
+
+  linux:
+    name: Linux (engine + UI flows)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - name: End-to-end flows in Electron
+        run: xvfb-run -a npm run e2e
