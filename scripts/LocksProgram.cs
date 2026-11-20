@@ -100,12 +100,17 @@ public static class LocksProgram
             Dictionary<int, WipeoutLockInfo> found = new Dictionary<int, WipeoutLockInfo>();
             Dictionary<int, bool> runsFrom = new Dictionary<int, bool>();
             foreach (WipeoutLockInfo h in hits) found[h.Pid] = h;
+            // Compare both the given and the real (long) form of each path, since
+            // either side may use 8.3 short names like C:\\Users\\RUNNER~1.
+            string[] canon = new string[full.Length];
+            for (int t = 0; t < full.Length; t++) canon[t] = WipeoutLocks.Canonical(full[t]);
             foreach (ProcInfo p in procs.Values)
             {
                 if (string.IsNullOrEmpty(p.Exe)) continue;
+                string exeLong = p.Exe.IndexOf('~') >= 0 ? WipeoutLocks.Canonical(p.Exe) : p.Exe;
                 for (int t = 0; t < full.Length; t++)
                 {
-                    if (!p.Exe.StartsWith(full[t] + "\\", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!UnderAny(p.Exe, exeLong, full[t], canon[t])) continue;
                     WipeoutLockInfo info;
                     if (!found.TryGetValue(p.Pid, out info))
                     {
@@ -201,6 +206,14 @@ public static class LocksProgram
             }
         }
         catch { return false; }
+    }
+
+    private static bool UnderAny(string exe, string exeLong, string target, string targetLong)
+    {
+        foreach (string e in new string[] { exe, exeLong })
+            foreach (string t in new string[] { target, targetLong })
+                if (e.StartsWith(t + "\\", StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
     }
 
     private static Dictionary<int, ProcInfo> SnapshotProcesses()

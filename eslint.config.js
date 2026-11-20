@@ -29,4 +29,9 @@ module.exports = [
       'no-redeclare': 'off',
     },
   },
+  {
+    // The website (site/) runs in the browser as a plain script.
+    files: ['site/**/*.js'],
+    languageOptions: { ecmaVersion: 2023, sourceType: 'script', globals: { ...globals.browser } },
+  },
 ];

@@ -41,6 +41,7 @@ try {
     }
     if ($targets.Count -eq 0) { throw 'No folder given.' }
     $full = @($targets | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') })
+    $canon = @($full | ForEach-Object { [WipeoutLocks]::Canonical($_) })
 
     $sw = [Diagnostics.Stopwatch]::StartNew()
     $hits = [WipeoutLocks]::FindMany([string[]]$full, 4)
@@ -73,8 +74,17 @@ try {
 
         $exe = [string]$p.ExecutablePath
         if (-not $exe) { continue }
+        # Either side may use 8.3 short names (C:\Users\RUNNER~1), so compare long forms too.
+        $exeForms = @($exe)
+        if ($exe.Contains('~')) { $exeForms += [WipeoutLocks]::Canonical($exe) }
         for ($t = 0; $t -lt $full.Count; $t++) {
-            if (-not $exe.StartsWith($full[$t] + '\', [StringComparison]::OrdinalIgnoreCase)) { continue }
+            $under = $false
+            foreach ($e in $exeForms) {
+                foreach ($root in @($full[$t], $canon[$t])) {
+                    if ($e.StartsWith($root + '\', [StringComparison]::OrdinalIgnoreCase)) { $under = $true }
+                }
+            }
+            if (-not $under) { continue }
             if (-not $found.ContainsKey($id)) {
                 $found[$id] = [ordered]@{
                     pid            = $id

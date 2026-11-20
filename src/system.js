@@ -21,9 +21,10 @@ function run(cmd, args, opts = {}) {
 }
 
 // Native helper and scripts ship outside app.asar (as extraResources) so
-// Windows can run them. In development they sit in the project folder.
+// Windows can run them. In development they sit in the project folder
+// (one level up from src/, whatever script Electron was started with).
 function resourcePath(...parts) {
-  const base = app.isPackaged ? process.resourcesPath : app.getAppPath();
+  const base = app.isPackaged ? process.resourcesPath : path.join(__dirname, '..');
   return path.join(base, ...parts);
 }
 
