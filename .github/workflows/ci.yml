@@ -31,6 +31,8 @@ jobs:
         run: npm test
       - name: Lock scanner against real processes
         run: npm run test:windows
+      - name: Wipeout Lite against real processes
+        run: npm run test:lite
       - name: End-to-end flows in Electron
         run: npm run e2e
       - name: Delete speed vs rmdir /s /q
@@ -43,6 +45,13 @@ jobs:
           path: |
             dist/*.exe
           retention-days: 7
+      - name: Build Wipeout Lite again for download (the test uninstalls its copy)
+        run: npm run build:helper
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wipeout-lite
+          path: lite/wipeout-lite.exe
+          retention-days: 14
 
   linux:
     name: Linux (engine + UI flows)

@@ -31,6 +31,18 @@ If you've searched for any of these, this is the tool:
 
 ![Batch clean-up of old node_modules folders](docs/screenshot-batch.png)
 
+## Wipeout Lite (no window)
+
+If you only want the right-click entry, use **Wipeout Lite**: one 70 KB `.exe`, no app window, nothing running in the background.
+
+1. Double-click `wipeout-lite.exe` and choose **Yes**. It copies itself to `%LOCALAPPDATA%\Programs\Wipeout Lite` and adds **Delete with Wipeout** to the folder right-click menu (for your user only, no admin).
+2. Right-click a folder → **Delete with Wipeout**. On Windows 11 it's under *Show more options*, or hold **Shift** while you right-click.
+3. One prompt lists anything using the folder (a dev server, a terminal, a program running from it). Choose **Yes** and Wipeout stops them and deletes the folder permanently. When it works, the folder just disappears.
+
+It never stops Windows processes, and it won't stop editors, browsers or terminal windows, because that would close every window they have open. It tells you to close the folder there instead. Links (junctions) inside the folder are removed without touching what they point to. Drives, Windows and program folders, and your user folders are refused. If something needs admin rights, it offers to try again as administrator.
+
+Remove it from **Settings → Apps → Wipeout Lite**, or double-click the installed `.exe` again. Build it with `npm run build:helper` (output: `lite/wipeout-lite.exe`); `npm run test:lite` tests it against real locked folders on Windows.
+
 ## Download
 
 Get the installer or the portable `.exe` from [Releases](https://github.com/Shahryartariq/wipeout-dev/releases). The installer keeps itself up to date.
@@ -53,10 +65,11 @@ npm start
 | `npm start` | Run the app |
 | `npm test` | Delete-engine, process-naming and scanner-output tests |
 | `npm run test:windows` | Lock scanner against real processes (Windows only) |
+| `npm run test:lite` | Wipeout Lite against real locked folders (Windows only) |
 | `npm run e2e` | Drives the real app through every flow |
 | `npm run lint` | ESLint |
 | `npm run bench` | Delete speed vs `rmdir /s /q` |
-| `npm run build:helper` | Rebuild `resources/wipeout-locks.exe` from `scripts/*.cs` |
+| `npm run build:helper` | Rebuild `resources/wipeout-locks.exe` and `lite/wipeout-lite.exe` |
 | `npm run dist` | Build the installer and portable `.exe` into `dist/` |
 
 To release, bump `version` in `package.json` and push a tag like `v1.0.1`. GitHub Actions builds both `.exe` files, attaches them to a draft release, and installed copies update once you publish it.
@@ -92,6 +105,7 @@ src/preload.js           the small, typed bridge the UI may use
 src/renderer/            UI: app.js, batch.js, locks-logic.js (naming and grouping)
 scripts/                 C# lock scanner, PowerShell fallback, helper build script
 resources/               the compiled wipeout-locks.exe
+lite/WipeoutLite.cs      Wipeout Lite: right-click delete with no window
 test/                    unit, Windows integration, end-to-end and benchmark
 build/installer.nsh      installer: right-click entry on install, cleanup on uninstall
 ```
