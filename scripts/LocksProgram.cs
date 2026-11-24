@@ -42,7 +42,7 @@ public static class LocksProgram
     private const int AF_INET6 = 23;
     private const int TCP_TABLE_OWNER_PID_LISTENER = 3;
 
-    private class ProcInfo
+    internal class ProcInfo
     {
         public int Pid;
         public int ParentPid;
@@ -85,53 +85,10 @@ public static class LocksProgram
             for (int t = 0; t < targets.Count; t++) full[t] = Path.GetFullPath(targets[t]).TrimEnd('\\');
 
             var sw = Stopwatch.StartNew();
-            WipeoutLockInfo[] hits = WipeoutLocks.FindMany(full, maxSamples);
-
-            Dictionary<int, ProcInfo> procs = SnapshotProcesses();
-            Dictionary<int, List<int>> children = new Dictionary<int, List<int>>();
-            foreach (ProcInfo p in procs.Values)
-            {
-                List<int> list;
-                if (!children.TryGetValue(p.ParentPid, out list)) { list = new List<int>(); children[p.ParentPid] = list; }
-                list.Add(p.Pid);
-            }
-
-            // Programs running from inside a folder lock it through their .exe.
-            Dictionary<int, WipeoutLockInfo> found = new Dictionary<int, WipeoutLockInfo>();
-            Dictionary<int, bool> runsFrom = new Dictionary<int, bool>();
-            foreach (WipeoutLockInfo h in hits) found[h.Pid] = h;
-            // Compare both the given and the real (long) form of each path, since
-            // either side may use 8.3 short names like C:\\Users\\RUNNER~1.
-            string[] canon = new string[full.Length];
-            for (int t = 0; t < full.Length; t++) canon[t] = WipeoutLocks.Canonical(full[t]);
-            foreach (ProcInfo p in procs.Values)
-            {
-                if (string.IsNullOrEmpty(p.Exe)) continue;
-                string exeLong = p.Exe.IndexOf('~') >= 0 ? WipeoutLocks.Canonical(p.Exe) : p.Exe;
-                for (int t = 0; t < full.Length; t++)
-                {
-                    if (!UnderAny(p.Exe, exeLong, full[t], canon[t])) continue;
-                    WipeoutLockInfo info;
-                    if (!found.TryGetValue(p.Pid, out info))
-                    {
-                        info = new WipeoutLockInfo();
-                        info.Pid = p.Pid;
-                        info.Samples = new string[] { p.Exe };
-                        info.ModuleSamples = new string[0];
-                        info.Targets = new int[0];
-                        found[p.Pid] = info;
-                    }
-                    if (Array.IndexOf(info.Targets, t) < 0)
-                    {
-                        int[] grown = new int[info.Targets.Length + 1];
-                        Array.Copy(info.Targets, grown, info.Targets.Length);
-                        grown[info.Targets.Length] = t;
-                        info.Targets = grown;
-                    }
-                    runsFrom[p.Pid] = true;
-                    break;
-                }
-            }
+            Dictionary<int, ProcInfo> procs;
+            Dictionary<int, bool> runsFrom;
+            Dictionary<int, WipeoutLockInfo> found = FindHolders(full, maxSamples, out procs, out runsFrom);
+            Dictionary<int, List<int>> children = ChildrenOf(procs);
 
             Dictionary<int, List<int>> ports = ListeningPorts();
 
@@ -187,6 +144,66 @@ public static class LocksProgram
         }
     }
 
+    // Every process holding one of the folders: open handles and loaded
+    // modules (from WipeoutLocks) plus programs whose .exe lives inside.
+    internal static Dictionary<int, WipeoutLockInfo> FindHolders(string[] full, int maxSamples,
+        out Dictionary<int, ProcInfo> procs, out Dictionary<int, bool> runsFrom)
+    {
+        WipeoutLockInfo[] hits = WipeoutLocks.FindMany(full, maxSamples);
+
+        procs = SnapshotProcesses();
+
+        // Programs running from inside a folder lock it through their .exe.
+        Dictionary<int, WipeoutLockInfo> found = new Dictionary<int, WipeoutLockInfo>();
+        runsFrom = new Dictionary<int, bool>();
+        foreach (WipeoutLockInfo h in hits) found[h.Pid] = h;
+        // Compare both the given and the real (long) form of each path, since
+        // either side may use 8.3 short names like C:\Users\RUNNER~1.
+        string[] canon = new string[full.Length];
+        for (int t = 0; t < full.Length; t++) canon[t] = WipeoutLocks.Canonical(full[t]);
+        foreach (ProcInfo p in procs.Values)
+        {
+            if (string.IsNullOrEmpty(p.Exe)) continue;
+            string exeLong = p.Exe.IndexOf('~') >= 0 ? WipeoutLocks.Canonical(p.Exe) : p.Exe;
+            for (int t = 0; t < full.Length; t++)
+            {
+                if (!UnderAny(p.Exe, exeLong, full[t], canon[t])) continue;
+                WipeoutLockInfo info;
+                if (!found.TryGetValue(p.Pid, out info))
+                {
+                    info = new WipeoutLockInfo();
+                    info.Pid = p.Pid;
+                    info.Samples = new string[] { p.Exe };
+                    info.ModuleSamples = new string[0];
+                    info.Targets = new int[0];
+                    found[p.Pid] = info;
+                }
+                if (Array.IndexOf(info.Targets, t) < 0)
+                {
+                    int[] grown = new int[info.Targets.Length + 1];
+                    Array.Copy(info.Targets, grown, info.Targets.Length);
+                    grown[info.Targets.Length] = t;
+                    info.Targets = grown;
+                }
+                runsFrom[p.Pid] = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    internal static Dictionary<int, List<int>> ChildrenOf(Dictionary<int, ProcInfo> procs)
+    {
+        Dictionary<int, List<int>> children = new Dictionary<int, List<int>>();
+        foreach (ProcInfo p in procs.Values)
+        {
+            List<int> list;
+            if (!children.TryGetValue(p.ParentPid, out list)) { list = new List<int>(); children[p.ParentPid] = list; }
+            list.Add(p.Pid);
+        }
+        return children;
+    }
+
     private static void WriteOut(string text)
     {
         byte[] bytes = new UTF8Encoding(false).GetBytes(text);
@@ -196,7 +213,7 @@ public static class LocksProgram
         }
     }
 
-    private static bool IsElevated()
+    internal static bool IsElevated()
     {
         try
         {
@@ -216,7 +233,7 @@ public static class LocksProgram
         return false;
     }
 
-    private static Dictionary<int, ProcInfo> SnapshotProcesses()
+    internal static Dictionary<int, ProcInfo> SnapshotProcesses()
     {
         var result = new Dictionary<int, ProcInfo>();
         Process[] all = Process.GetProcesses();
@@ -295,7 +312,7 @@ public static class LocksProgram
         return null;
     }
 
-    private static Dictionary<int, List<int>> ListeningPorts()
+    internal static Dictionary<int, List<int>> ListeningPorts()
     {
         var ports = new Dictionary<int, List<int>>();
         try { ReadTcpTable(AF_INET, 24, 20, ports); } catch { }
@@ -331,7 +348,7 @@ public static class LocksProgram
     }
 
     // Ports owned by a process or anything it started (npm -> node -> the actual server).
-    private static List<int> TreePorts(int pid, Dictionary<int, List<int>> children, Dictionary<int, List<int>> ports)
+    internal static List<int> TreePorts(int pid, Dictionary<int, List<int>> children, Dictionary<int, List<int>> ports)
     {
         var result = new List<int>();
         var seen = new HashSet<int>();

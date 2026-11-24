@@ -39,7 +39,8 @@
     "build:helper": "node scripts/build-helper.js",
     "dist": "npm run build:helper && electron-builder --win --publish never",
     "release": "npm run build:helper && electron-builder --win --publish always",
-    "shots": "electron test/screenshot-main.js"
+    "shots": "electron test/screenshot-main.js",
+    "test:lite": "node test/lite.test.js"
   },
   "dependencies": {
     "electron-updater": "^6.8.11"
